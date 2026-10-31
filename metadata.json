@@ -1,0 +1,6 @@
+{
+  "name": "CinePulse Streaming",
+  "description": "A premium, cinematic movie and television streaming platform with live TMDB integration, authorized playback, and multi-profile management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

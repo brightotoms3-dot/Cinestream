@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#101522"/>
+      <stop offset="100%" stop-color="#080B12"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF2E54"/>
+      <stop offset="50%" stop-color="#E50932"/>
+      <stop offset="100%" stop-color="#99001C"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F2D184"/>
+      <stop offset="100%" stop-color="#D6A85F"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  <!-- Background with subtle border -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="2" y="2" width="508" height="508" rx="110" fill="none" stroke="#273144" stroke-width="4"/>
+
+  <!-- Glowing emblem -->
+  <g filter="url(#glow)">
+    <!-- Cinematic Film Strip / Arc -->
+    <path d="M140 130 C200 90, 312 90, 372 130 C410 156, 420 200, 410 240 C395 290, 350 340, 290 370 C240 395, 180 385, 140 350 C100 315, 95 260, 115 210 Z" fill="none" stroke="url(#accent)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+  </g>
+
+  <!-- Modern Dynamic Stream Hex/Play Icon -->
+  <path d="M190 150 L370 256 L190 362 Z" fill="url(#accent)"/>
+  <!-- Gold Accent overlay highlight -->
+  <path d="M190 150 L275 200 L275 312 L190 362 Z" fill="url(#gold)" opacity="0.85"/>
+  <circle cx="370" cy="256" r="16" fill="#F5F5F7" opacity="0.9"/>
+</svg>

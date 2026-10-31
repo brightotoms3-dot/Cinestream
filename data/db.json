@@ -1,0 +1,154 @@
+{
+  "users": [
+    {
+      "id": "user_admin",
+      "email": "brightotoms@gmail.com",
+      "passwordHash": "baa97ccab4c1653f299d580ba5d91844aba3ccae9099b1b21d8cf5a809977a4a",
+      "name": "Brighto (Admin)",
+      "role": "admin",
+      "createdAt": "2026-10-31T22:24:25.060Z",
+      "profiles": [
+        {
+          "id": "prof_1",
+          "name": "Brighto (Admin)",
+          "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+          "isKids": false,
+          "watchlist": [],
+          "continueWatching": [],
+          "preferences": {
+            "audioLanguage": "en",
+            "subtitleLanguage": "en",
+            "autoplayNext": true,
+            "defaultQuality": "1080p"
+          }
+        },
+        {
+          "id": "prof_2",
+          "name": "Cinema Room",
+          "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80",
+          "isKids": false,
+          "watchlist": [],
+          "continueWatching": [],
+          "preferences": {
+            "audioLanguage": "en",
+            "subtitleLanguage": "off",
+            "autoplayNext": true,
+            "defaultQuality": "4k"
+          }
+        },
+        {
+          "id": "prof_3",
+          "name": "Kids Club",
+          "avatar": "https://images.unsplash.com/photo-1566492031773-4f4e44671857?auto=format&fit=crop&w=300&q=80",
+          "isKids": true,
+          "watchlist": [],
+          "continueWatching": [],
+          "preferences": {
+            "audioLanguage": "en",
+            "subtitleLanguage": "en",
+            "autoplayNext": false,
+            "defaultQuality": "720p"
+          }
+        }
+      ]
+    },
+    {
+      "id": "user_1793485487491_4tjd6",
+      "email": "cinema.fan@cinepulse.io",
+      "passwordHash": "71dcb2d59a018a35927732d0646cb2cd8981651f9e7ad977407b908a65f9a582",
+      "name": "Alex Rivera",
+      "role": "user",
+      "createdAt": "2026-10-31T22:24:47.491Z",
+      "profiles": [
+        {
+          "id": "prof_1793485487491",
+          "name": "Alex Rivera",
+          "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+          "isKids": false,
+          "watchlist": [],
+          "continueWatching": [
+            {
+              "id": 289517,
+              "media_type": "movie",
+              "title": "Dead-End Job: S1E8 - Last Carnival",
+              "poster_path": "/vrDDqk9PAkIs0PQAbW5G0yhPVS3.jpg",
+              "backdrop_path": "/gWedDgBsZkuOho2qe3q2sTQmbpO.jpg",
+              "currentTime": 10,
+              "duration": 180,
+              "progressPercent": 6,
+              "lastWatched": "2026-10-31T22:27:26.301Z"
+            },
+            {
+              "id": 1507696,
+              "media_type": "movie",
+              "title": "Apocalypse Z: New World",
+              "poster_path": "/wXln4DUrwcyjcFPwgQxFPYTlG1Z.jpg",
+              "backdrop_path": "/o3XwuDUj0n8qnK91p6q8LKfr6rj.jpg",
+              "currentTime": 45,
+              "duration": 180,
+              "progressPercent": 25,
+              "lastWatched": "2026-10-31T22:26:28.248Z"
+            }
+          ],
+          "preferences": {
+            "audioLanguage": "en",
+            "subtitleLanguage": "en",
+            "autoplayNext": true,
+            "defaultQuality": "1080p"
+          }
+        }
+      ]
+    }
+  ],
+  "streamingProviders": [
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "badgeColor": "#E50914",
+      "logo": "https://assets.nflxext.com/ffe/siteui/common/icons/nficon2023.ico",
+      "active": true,
+      "searchUrl": "https://www.netflix.com/search?q="
+    },
+    {
+      "id": "appletv",
+      "name": "Apple TV+",
+      "badgeColor": "#FFFFFF",
+      "logo": "https://tv.apple.com/favicon.ico",
+      "active": true,
+      "searchUrl": "https://tv.apple.com/search?term="
+    },
+    {
+      "id": "max",
+      "name": "Max",
+      "badgeColor": "#002BE7",
+      "logo": "https://www.max.com/favicon.ico",
+      "active": true,
+      "searchUrl": "https://play.max.com/search?q="
+    },
+    {
+      "id": "prime",
+      "name": "Prime Video",
+      "badgeColor": "#00A8E1",
+      "logo": "https://www.primevideo.com/favicon.ico",
+      "active": true,
+      "searchUrl": "https://www.amazon.com/s?k="
+    },
+    {
+      "id": "disney",
+      "name": "Disney+",
+      "badgeColor": "#113CCF",
+      "logo": "https://www.disneyplus.com/favicon.ico",
+      "active": true,
+      "searchUrl": "https://www.disneyplus.com/search?q="
+    }
+  ],
+  "customFeaturedId": null,
+  "analytics": {
+    "totalStreams": 1850,
+    "totalWatchMinutes": 24301,
+    "popularMedia": {
+      "289517": 1,
+      "1507696": 2
+    }
+  }
+}

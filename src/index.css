@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #080B12;
+    --bg-secondary: #101522;
+    --bg-card: #151C2B;
+    --bg-elevated: #1C2535;
+    --accent-primary: #E50932;
+    --accent-secondary: #D6A85F;
+    --text-primary: #F5F5F7;
+    --text-secondary: #A3AAB8;
+    --text-muted: #687386;
+    --border-color: #273144;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080B12;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #273144;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #37435B;
+}
+
+/* Hide scrollbar for carousel rows while maintaining scroll functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Cinematic vignettes and gradients */
+.hero-vignette {
+  background: linear-gradient(
+    to bottom,
+    rgba(8, 11, 18, 0.2) 0%,
+    rgba(8, 11, 18, 0.4) 40%,
+    rgba(8, 11, 18, 0.85) 75%,
+    #080B12 100%
+  );
+}
+
+.hero-vignette-left {
+  background: linear-gradient(
+    to right,
+    rgba(8, 11, 18, 0.95) 0%,
+    rgba(8, 11, 18, 0.8) 35%,
+    rgba(8, 11, 18, 0.2) 70%,
+    rgba(8, 11, 18, 0) 100%
+  );
+}
