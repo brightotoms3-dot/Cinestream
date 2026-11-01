@@ -13,11 +13,12 @@ import { MoviesPage } from './pages/MoviesPage';
 import { TVShowsPage } from './pages/TVShowsPage';
 import { NewPopularPage } from './pages/NewPopularPage';
 import { MyListPage } from './pages/MyListPage';
+import { DownloadsPage } from './pages/DownloadsPage';
 import { SearchPage } from './pages/SearchPage';
 import { MovieItem } from './types';
 
 const StreamingApp: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState<'home' | 'movies' | 'tv' | 'new' | 'watchlist' | 'search'>('home');
+  const [currentTab, setCurrentTab] = useState<'home' | 'movies' | 'tv' | 'new' | 'watchlist' | 'downloads' | 'search'>('home');
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   const {
@@ -54,6 +55,7 @@ const StreamingApp: React.FC = () => {
         {currentTab === 'tv' && <TVShowsPage />}
         {currentTab === 'new' && <NewPopularPage />}
         {currentTab === 'watchlist' && <MyListPage />}
+        {currentTab === 'downloads' && <DownloadsPage />}
         {currentTab === 'search' && <SearchPage />}
       </main>
 
