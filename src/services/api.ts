@@ -43,6 +43,21 @@ function getAuthHeaders(): HeadersInit {
 const clientCache = new Map<string, { timestamp: number; data: any }>();
 const CLIENT_CACHE_TTL = 3 * 60 * 1000; // 3 minutes
 
+// Fallback to direct TMDB API for static deployments (e.g. Vercel)
+const TMDB_DIRECT_KEY = '286855a91070a5d195e44aba70f81f53';
+const TMDB_DIRECT_BASE = 'https://api.themoviedb.org/3';
+
+async function directTmdbFetch(path: string, params: Record<string, string> = {}): Promise<any> {
+  const url = new URL(`${TMDB_DIRECT_BASE}${path}`);
+  url.searchParams.set('api_key', TMDB_DIRECT_KEY);
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v);
+  }
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`TMDB direct ${res.status}`);
+  return res.json();
+}
+
 // Safe JSON fetcher that guards against HTML responses (e.g. Vite SPA fallback)
 async function safeFetchJson<T>(url: string, fallback: T, options?: RequestInit): Promise<T> {
   const cacheKey = url;
@@ -55,11 +70,82 @@ async function safeFetchJson<T>(url: string, fallback: T, options?: RequestInit)
     const res = await fetch(url, options);
     const contentType = res.headers.get('content-type') || '';
 
-    // If server returned HTML (e.g. <!doctype html> SPA fallback during reload)
     if (!contentType.includes('application/json')) {
       const text = await res.text();
       if (text.trim().startsWith('<')) {
-        console.warn(`[CinePulse API] Server returned HTML for ${url}, using fallback.`);
+        console.warn(`[CinePulse API] Server returned HTML for ${url}, trying direct TMDB fallback.`);
+        try {
+          if (url.includes('/api/tmdb/trending/')) {
+            const parts = url.split('/api/tmdb/trending/')[1].split('?')[0].split('/');
+            const mediaType = parts[0] || 'all';
+            const timeWindow = parts[1] || 'day';
+            const page = new URLSearchParams(url.split('?')[1] || '').get('page') || '1';
+            const data = await directTmdbFetch(`/trending/${mediaType}/${timeWindow}`, { page });
+            clientCache.set(cacheKey, { timestamp: Date.now(), data });
+            return data as T;
+          }
+          if (url.includes('/api/tmdb/movies/')) {
+            const category = url.split('/api/tmdb/movies/')[1].split('?')[0];
+            const page = new URLSearchParams(url.split('?')[1] || '').get('page') || '1';
+            const data = await directTmdbFetch(`/movie/${category}`, { page });
+            clientCache.set(cacheKey, { timestamp: Date.now(), data });
+            return data as T;
+          }
+          if (url.includes('/api/tmdb/tv/')) {
+            const category = url.split('/api/tmdb/tv/')[1].split('?')[0];
+            const page = new URLSearchParams(url.split('?')[1] || '').get('page') || '1';
+            const data = await directTmdbFetch(`/tv/${category}`, { page });
+            clientCache.set(cacheKey, { timestamp: Date.now(), data });
+            return data as T;
+          }
+          if (url.includes('/api/tmdb/movie/') && !url.includes('/api/tmdb/movies/')) {
+            const id = url.split('/api/tmdb/movie/')[1].split('?')[0];
+            const data = await directTmdbFetch(`/movie/${id}`, { append_to_response: 'credits,videos,similar,recommendations,watch/providers' });
+            clientCache.set(cacheKey, { timestamp: Date.now(), data });
+            return data as T;
+          }
+          if (url.includes('/api/tmdb/tv-detail/')) {
+            const id = url.split('/api/tmdb/tv-detail/')[1].split('?')[0];
+            const data = await directTmdbFetch(`/tv/${id}`, { append_to_response: 'credits,videos,similar,recommendations,watch/providers' });
+            clientCache.set(cacheKey, { timestamp: Date.now(), data });
+            return data as T;
+          }
+          if (url.includes('/api/tmdb/tv-season/')) {
+            const parts = url.split('/api/tmdb/tv-season/')[1].split('/');
+            const id = parts[0];
+            const season = parts[1].split('?')[0];
+            const data = await directTmdbFetch(`/tv/${id}/season/${season}`);
+            clientCache.set(cacheKey, { timestamp: Date.now(), data });
+            return data as T;
+          }
+          if (url.includes('/api/tmdb/genres/')) {
+            const mediaType = url.split('/api/tmdb/genres/')[1].split('?')[0];
+            const data = await directTmdbFetch(`/genre/${mediaType}/list`);
+            clientCache.set(cacheKey, { timestamp: Date.now(), data });
+            return data as T;
+          }
+          if (url.includes('/api/tmdb/discover/')) {
+            const mediaType = url.split('/api/tmdb/discover/')[1].split('?')[0];
+            const search = url.split('?')[1] || '';
+            const params = Object.fromEntries(new URLSearchParams(search).entries());
+            const data = await directTmdbFetch(`/discover/${mediaType}`, params);
+            clientCache.set(cacheKey, { timestamp: Date.now(), data });
+            return data as T;
+          }
+          if (url.includes('/api/tmdb/search')) {
+            const search = url.split('?')[1] || '';
+            const params = Object.fromEntries(new URLSearchParams(search).entries());
+            const query = params.query || '';
+            const type = params.type || 'multi';
+            const page = params.page || '1';
+            const endpoint = type === 'movie' ? '/search/movie' : type === 'tv' ? '/search/tv' : '/search/multi';
+            const data = await directTmdbFetch(endpoint, { query, page });
+            clientCache.set(cacheKey, { timestamp: Date.now(), data });
+            return data as T;
+          }
+        } catch (e) {
+          console.warn('[CinePulse API] Direct TMDB fallback failed:', e);
+        }
         return fallback;
       }
       try {
@@ -72,7 +158,79 @@ async function safeFetchJson<T>(url: string, fallback: T, options?: RequestInit)
     }
 
     if (!res.ok) {
-      console.warn(`[CinePulse API] HTTP ${res.status} from ${url}, using fallback.`);
+      console.warn(`[CinePulse API] HTTP ${res.status} from ${url}, trying direct TMDB fallback.`);
+      try {
+        if (url.includes('/api/tmdb/trending/')) {
+          const parts = url.split('/api/tmdb/trending/')[1].split('?')[0].split('/');
+          const mediaType = parts[0] || 'all';
+          const timeWindow = parts[1] || 'day';
+          const page = new URLSearchParams(url.split('?')[1] || '').get('page') || '1';
+          const data = await directTmdbFetch(`/trending/${mediaType}/${timeWindow}`, { page });
+          clientCache.set(cacheKey, { timestamp: Date.now(), data });
+          return data as T;
+        }
+        if (url.includes('/api/tmdb/movies/')) {
+          const category = url.split('/api/tmdb/movies/')[1].split('?')[0];
+          const page = new URLSearchParams(url.split('?')[1] || '').get('page') || '1';
+          const data = await directTmdbFetch(`/movie/${category}`, { page });
+          clientCache.set(cacheKey, { timestamp: Date.now(), data });
+          return data as T;
+        }
+        if (url.includes('/api/tmdb/tv/')) {
+          const category = url.split('/api/tmdb/tv/')[1].split('?')[0];
+          const page = new URLSearchParams(url.split('?')[1] || '').get('page') || '1';
+          const data = await directTmdbFetch(`/tv/${category}`, { page });
+          clientCache.set(cacheKey, { timestamp: Date.now(), data });
+          return data as T;
+        }
+        if (url.includes('/api/tmdb/movie/') && !url.includes('/api/tmdb/movies/')) {
+          const id = url.split('/api/tmdb/movie/')[1].split('?')[0];
+          const data = await directTmdbFetch(`/movie/${id}`, { append_to_response: 'credits,videos,similar,recommendations,watch/providers' });
+          clientCache.set(cacheKey, { timestamp: Date.now(), data });
+          return data as T;
+        }
+        if (url.includes('/api/tmdb/tv-detail/')) {
+          const id = url.split('/api/tmdb/tv-detail/')[1].split('?')[0];
+          const data = await directTmdbFetch(`/tv/${id}`, { append_to_response: 'credits,videos,similar,recommendations,watch/providers' });
+          clientCache.set(cacheKey, { timestamp: Date.now(), data });
+          return data as T;
+        }
+        if (url.includes('/api/tmdb/tv-season/')) {
+          const parts = url.split('/api/tmdb/tv-season/')[1].split('/');
+          const id = parts[0];
+          const season = parts[1].split('?')[0];
+          const data = await directTmdbFetch(`/tv/${id}/season/${season}`);
+          clientCache.set(cacheKey, { timestamp: Date.now(), data });
+          return data as T;
+        }
+        if (url.includes('/api/tmdb/genres/')) {
+          const mediaType = url.split('/api/tmdb/genres/')[1].split('?')[0];
+          const data = await directTmdbFetch(`/genre/${mediaType}/list`);
+          clientCache.set(cacheKey, { timestamp: Date.now(), data });
+          return data as T;
+        }
+        if (url.includes('/api/tmdb/discover/')) {
+          const mediaType = url.split('/api/tmdb/discover/')[1].split('?')[0];
+          const search = url.split('?')[1] || '';
+          const params = Object.fromEntries(new URLSearchParams(search).entries());
+          const data = await directTmdbFetch(`/discover/${mediaType}`, params);
+          clientCache.set(cacheKey, { timestamp: Date.now(), data });
+          return data as T;
+        }
+        if (url.includes('/api/tmdb/search')) {
+          const search = url.split('?')[1] || '';
+          const params = Object.fromEntries(new URLSearchParams(search).entries());
+          const query = params.query || '';
+          const type = params.type || 'multi';
+          const page = params.page || '1';
+          const endpoint = type === 'movie' ? '/search/movie' : type === 'tv' ? '/search/tv' : '/search/multi';
+          const data = await directTmdbFetch(endpoint, { query, page });
+          clientCache.set(cacheKey, { timestamp: Date.now(), data });
+          return data as T;
+        }
+      } catch (e) {
+        console.warn('[CinePulse API] Direct TMDB fallback failed:', e);
+      }
       return fallback;
     }
 
@@ -81,6 +239,78 @@ async function safeFetchJson<T>(url: string, fallback: T, options?: RequestInit)
     return data as T;
   } catch (err) {
     console.warn(`[CinePulse API] Fetch failed for ${url}:`, err);
+    try {
+      if (url.includes('/api/tmdb/trending/')) {
+        const parts = url.split('/api/tmdb/trending/')[1].split('?')[0].split('/');
+        const mediaType = parts[0] || 'all';
+        const timeWindow = parts[1] || 'day';
+        const page = new URLSearchParams(url.split('?')[1] || '').get('page') || '1';
+        const data = await directTmdbFetch(`/trending/${mediaType}/${timeWindow}`, { page });
+        clientCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data as T;
+      }
+      if (url.includes('/api/tmdb/movies/')) {
+        const category = url.split('/api/tmdb/movies/')[1].split('?')[0];
+        const page = new URLSearchParams(url.split('?')[1] || '').get('page') || '1';
+        const data = await directTmdbFetch(`/movie/${category}`, { page });
+        clientCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data as T;
+      }
+      if (url.includes('/api/tmdb/tv/')) {
+        const category = url.split('/api/tmdb/tv/')[1].split('?')[0];
+        const page = new URLSearchParams(url.split('?')[1] || '').get('page') || '1';
+        const data = await directTmdbFetch(`/tv/${category}`, { page });
+        clientCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data as T;
+      }
+      if (url.includes('/api/tmdb/movie/') && !url.includes('/api/tmdb/movies/')) {
+        const id = url.split('/api/tmdb/movie/')[1].split('?')[0];
+        const data = await directTmdbFetch(`/movie/${id}`, { append_to_response: 'credits,videos,similar,recommendations,watch/providers' });
+        clientCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data as T;
+      }
+      if (url.includes('/api/tmdb/tv-detail/')) {
+        const id = url.split('/api/tmdb/tv-detail/')[1].split('?')[0];
+        const data = await directTmdbFetch(`/tv/${id}`, { append_to_response: 'credits,videos,similar,recommendations,watch/providers' });
+        clientCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data as T;
+      }
+      if (url.includes('/api/tmdb/tv-season/')) {
+        const parts = url.split('/api/tmdb/tv-season/')[1].split('/');
+        const id = parts[0];
+        const season = parts[1].split('?')[0];
+        const data = await directTmdbFetch(`/tv/${id}/season/${season}`);
+        clientCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data as T;
+      }
+      if (url.includes('/api/tmdb/genres/')) {
+        const mediaType = url.split('/api/tmdb/genres/')[1].split('?')[0];
+        const data = await directTmdbFetch(`/genre/${mediaType}/list`);
+        clientCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data as T;
+      }
+      if (url.includes('/api/tmdb/discover/')) {
+        const mediaType = url.split('/api/tmdb/discover/')[1].split('?')[0];
+        const search = url.split('?')[1] || '';
+        const params = Object.fromEntries(new URLSearchParams(search).entries());
+        const data = await directTmdbFetch(`/discover/${mediaType}`, params);
+        clientCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data as T;
+      }
+      if (url.includes('/api/tmdb/search')) {
+        const search = url.split('?')[1] || '';
+        const params = Object.fromEntries(new URLSearchParams(search).entries());
+        const query = params.query || '';
+        const type = params.type || 'multi';
+        const page = params.page || '1';
+        const endpoint = type === 'movie' ? '/search/movie' : type === 'tv' ? '/search/tv' : '/search/multi';
+        const data = await directTmdbFetch(endpoint, { query, page });
+        clientCache.set(cacheKey, { timestamp: Date.now(), data });
+        return data as T;
+      }
+    } catch (e) {
+      console.warn('[CinePulse API] Direct TMDB fallback failed:', e);
+    }
     return fallback;
   }
 }
