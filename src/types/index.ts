@@ -25,6 +25,9 @@ export interface MovieItem {
   number_of_seasons?: number;
   number_of_episodes?: number;
   seasons?: Season[];
+  // Playback selection for TV (used by the VidSrc provider integration)
+  seasonNumber?: number;
+  episodeNumber?: number;
   credits?: {
     cast: CastMember[];
     crew: CrewMember[];
@@ -123,6 +126,33 @@ export interface WatchlistItem {
   vote_average: number;
   release_date?: string;
   addedAt: string;
+}
+
+export interface DownloadedEpisode {
+  episode_number: number;
+  name: string;
+  runtime?: number | null;
+  still_path?: string | null;
+  overview?: string;
+}
+
+// In-app download entry — stored only inside the app (IndexedDB), never on device storage
+export interface DownloadItem {
+  id: string; // "movie-123" or "tv-456-s2"
+  tmdbId: number;
+  media_type: 'movie' | 'tv';
+  kind: 'movie' | 'season';
+  title: string;
+  seasonNumber?: number;
+  seasonName?: string;
+  episodeCount?: number;
+  episodes?: DownloadedEpisode[];
+  poster_path?: string | null;
+  backdrop_path?: string | null;
+  vote_average?: number;
+  release_date?: string;
+  embedUrl: string | null;
+  downloadedAt: string;
 }
 
 export interface ContinueWatchingItem {
